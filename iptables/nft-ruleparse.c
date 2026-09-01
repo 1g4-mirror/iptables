@@ -849,7 +849,7 @@ static void nft_parse_transport_range(struct nft_xt_ctx *ctx,
 	}
 
 	nftnl_expr_get(e, NFTNL_EXPR_RANGE_FROM_DATA, &len_from);
-	nftnl_expr_get(e, NFTNL_EXPR_RANGE_FROM_DATA, &len_to);
+	nftnl_expr_get(e, NFTNL_EXPR_RANGE_TO_DATA, &len_to);
 	if (len_to != len_from || len_to != 2)
 		return;
 
