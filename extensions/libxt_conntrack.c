@@ -1201,6 +1201,9 @@ static void addr_xlate_print(struct xt_xlate *xl,
 	}
 }
 
+#define XT_CONNTRACK_STATE_SDNAT	( XT_CONNTRACK_STATE_SNAT | \
+					  XT_CONNTRACK_STATE_DNAT )
+
 static int _conntrack3_mt_xlate(struct xt_xlate *xl,
 				const struct xt_xlate_mt_params *params,
 				int family)
@@ -1227,15 +1230,16 @@ static int _conntrack3_mt_xlate(struct xt_xlate *xl,
 	}
 
 	if (sinfo->match_flags & XT_CONNTRACK_STATE) {
-		if ((sinfo->state_mask & XT_CONNTRACK_STATE_SNAT) ||
-		    (sinfo->state_mask & XT_CONNTRACK_STATE_DNAT)) {
+		if (sinfo->state_mask & XT_CONNTRACK_STATE_SDNAT) {
+			if (sinfo->state_mask & ~XT_CONNTRACK_STATE_SDNAT)
+				return 0;
+
 			xt_xlate_add(xl, "%sct status %s%s", space,
 				     sinfo->invert_flags & XT_CONNTRACK_STATE ? "!= " : "",
 				     sinfo->state_mask & XT_CONNTRACK_STATE_SNAT ? "snat" : "dnat");
 			space = " ";
 		}
-		if (sinfo->state_mask & ~(XT_CONNTRACK_STATE_SNAT |
-					  XT_CONNTRACK_STATE_DNAT)) {
+		if (sinfo->state_mask & ~XT_CONNTRACK_STATE_SDNAT) {
 			xt_xlate_add(xl, "%sct state ", space);
 			state_xlate_print(xl, sinfo->state_mask,
 					  sinfo->invert_flags & XT_CONNTRACK_STATE);
